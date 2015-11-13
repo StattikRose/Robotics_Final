@@ -1,2 +1,2 @@
 # Robotics_Final
-CSCI 3302
+CSCI 3302: Robotics
