@@ -14,8 +14,25 @@ Sparki Bot will navigate around an open are filled with golf balls. Sparki will 
 
 ## Sparki State Codes and Coding Assignments
 1. State 1 (Jared Jolton)
+    * Search path, object detection, check if end
 2. State 2 (Brian Kidd)
+    * Retrieve object, grab, determin color
 3. State 3 (Zack Allen)
+    * Go to SBLI, while checking left IR sensor to prevent fall
 4. State 4 (Jennifer Dooley)
+    * Go up color coded line, fix odometry with localization, find correct bin & deposit, return to SBLI
 5. State 5 (Brian Salmon)
+    * Goes from SBLI to where ball was found, clear global vars and set state to 1
 6. State 6 (All) 
+	* Celabrate!
+
+## State Input/Output requirements
+| State | Input | Output |
+| :---- | :---------------- | :----------------------- |
+| 1. | None | Approximate location of Object |
+| 2. | Approx. Loc of obj | ID color and return Location |
+| 3. | None | None |
+| 4. | ID color | None |
+| 5. | return location | None |
+| 6. | None | None |
+
