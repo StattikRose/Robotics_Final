@@ -37,4 +37,4 @@ Sparki Bot will navigate around an open are filled with golf balls. Sparki will 
 | 6. | None | None |
 
 ## Platform Layout
-![PlatformSketch.png]
+![PlatformSketch.png](https://github.com/StattikRose/Robotics_Final/blob/master/PlatformSketch.png)
