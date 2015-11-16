@@ -24,5 +24,13 @@ int currentState = 1;
 	//Sparki turns around and follows CCL to (0,0) then returns to SBLI  
 
 //State 5 : Brian S.
+	// Sparki moves from SBLI to the coordinates of the last location 
+	// of where Sparki spotted the ball.
+	
+	// Clear global variables
+	
+	// Sparki will resume its patterned search in state 1
+	
+	
 
 //State 6 : All
