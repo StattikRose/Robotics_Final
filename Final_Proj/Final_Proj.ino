@@ -1,10 +1,57 @@
+#include <Sparki.h>
+
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
 int ballColor = NULL;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int currentState = 1;
+int mapSizeX = 10; // ???
+int mapSizeY = 10; // ???
+int currentX = 0;
+int currentY = 0;
 
+void lookAround() {
+	//this function will be used to get ultrasound readings
+}
+
+void setup() {
+	sparki.gripperOpen(); //do we want to specify a value here?	
+}
+
+void loop() {
+	if (state == 1) //search the map, only move to state 2 if an object is detected
+	{
+		if (ballLocationX == NULL) //hasn't found a ball yet... there is probably a cleaner way of doing this
+		{
+			ultrasound_reading = lookAround()
+			if (currentX < mapSizeX)
+			{
+				sparki.moveForward()
+			}	
+		}
+	}
+	else if (state == 2) 
+	{
+		//state 2
+	}
+	else if (state == 3)
+	{
+		//state 3
+	}
+	else if (state == 4)
+	{
+		//state 4
+	}
+	else if (state == 5)
+	{
+		//state 5
+	}
+	else
+	{
+		//all done!
+	}
+}	
 
 //State 1 : Jared
 
