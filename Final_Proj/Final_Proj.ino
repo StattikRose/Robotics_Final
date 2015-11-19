@@ -1,26 +1,41 @@
 #include <Sparki.h>
+#include <Wire.h>
+#include "SparkFunISL29125.h"
 
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
 int ballColor = NULL;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
-int currentState = 1;
+int state = 1;
 int mapSizeX = 10; // ???
 int mapSizeY = 10; // ???
 int currentX = 0;
 int currentY = 0;
-
+/*
 void lookAround() {
 	//this function will be used to get ultrasound readings
 }
-
+*/
+SFE_ISL29125 RGB_sensor;
 void setup() {
-	sparki.gripperOpen(); //do we want to specify a value here?	
+	//sparki.gripperOpen(); //do we want to specify a value here?	
+        Serial.begin(115200);
+        RGB_sensor.init();
+        sparki.clearLCD();
 }
 
+void readColor() {
+   unsigned int color = RGB_sensor.readRed();
+   Serial.println(color);
+   sparki.updateLCD();
+}
+
+
 void loop() {
-	if (state == 1) //search the map, only move to state 2 if an object is detected
+      readColor();
+	/*
+      if (state == 1) //search the map, only move to state 2 if an object is detected
 	{
 		if (ballLocationX == NULL) //hasn't found a ball yet... there is probably a cleaner way of doing this
 		{
@@ -51,6 +66,7 @@ void loop() {
 	{
 		//all done!
 	}
+*/
 }	
 
 //State 1 : Jared

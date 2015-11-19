@@ -131,7 +131,7 @@ class SFE_ISL29125
   uint8_t readStatus();
   
  private:
-  uint8_t _addr;
+  uint8_t addr; //used to be _addr
   
   uint8_t read8(uint8_t reg);
   void write8(uint8_t reg, uint8_t data);
