@@ -20,7 +20,7 @@ Distributed as-is; no warranty is given.
 #ifndef SFE_ISL29125_h
 #define SFE_ISL29125_h
 
-#include "Wire.h"
+#include <Wire.h>
 
 // ISL29125 I2C Address
 #define ISL_I2C_ADDR 0x44
@@ -131,7 +131,7 @@ class SFE_ISL29125
   uint8_t readStatus();
   
  private:
-  uint8_t addr; //used to be _addr
+  uint8_t _addr; //used to be _addr
   
   uint8_t read8(uint8_t reg);
   void write8(uint8_t reg, uint8_t data);
@@ -142,3 +142,4 @@ class SFE_ISL29125
 };
 
 #endif
+

@@ -1,5 +1,6 @@
+
 #include <Sparki.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include "SparkFunISL29125.h"
 
 //Global variables
@@ -97,3 +98,4 @@ void loop() {
 	
 
 //State 6 : All
+
