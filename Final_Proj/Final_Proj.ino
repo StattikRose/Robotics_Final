@@ -27,7 +27,7 @@ void setup() {
 }
 
 void readColor() {
-   unsigned int color = RGB_sensor.readRed();
+   unsigned int color = RGB_sensor.readStatus();
    Serial.println(color);
    sparki.updateLCD();
 }
