@@ -1,7 +1,12 @@
 
 #include <Sparki.h>
+<<<<<<< Updated upstream
 //#include <Wire.h>
 #include "SparkFunISL29125.h"
+=======
+#include <Wire.h>
+#include "SFE_ISL29125.h"
+>>>>>>> Stashed changes
 
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
