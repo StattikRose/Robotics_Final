@@ -1,5 +1,5 @@
 #include <Sparki.h>
-#include <Wire.h>
+#include "twi.h"
 #include "SparkFunISL29125.h"
 
 //Global variables
