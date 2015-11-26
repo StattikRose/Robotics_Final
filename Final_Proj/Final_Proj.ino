@@ -1,9 +1,9 @@
 
 #include <Sparki.h>
 //#include <Wire.h>
-#include "SparkFunISL29125.h"
-#include <Wire.h>
-#include "SFE_ISL29125.h"
+//#include "SparkFunISL29125.h"
+//#include <Wire.h>
+//#include "SFE_ISL29125.h"
 
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
@@ -16,32 +16,33 @@ int mapSizeY = 10; // ???
 int currentX = 0;
 int currentY = 0;
 
-SFE_ISL29125 RGB_sensor;
+//SFE_ISL29125 RGB_sensor;
 
 void setup() {
 	//sparki.gripperOpen(); //do we want to specify a value here?	
         Serial.begin(115200);
-        RGB_sensor.init();
+        //RGB_sensor.init();
         sparki.clearLCD();
 }
 
-void lookAround() {
-	dist = sparki.ping();
+int lookAround() {
+	int dist = sparki.ping();
 	if (dist < 5) {
 		sparki.beep();
-		return 0
+		return 0;
 	}
 	else {
-		return 1
+		return 1;
 	}
 	//this function will be used to get ultrasound readings
 }
 
-int readColor() {
-   unsigned int color = RGB_sensor.readStatus();
-   Serial.println(color);
-   sparki.updateLCD();
-   return color;
+int readColor() {  //why is broken ):
+   //unsigned int color = RGB_sensor.readStatus();
+   //Serial.println(color);
+   //sparki.updateLCD();
+    unsigned int color = 0;
+    return color;
 }
 
 int state1() {
@@ -50,11 +51,12 @@ int state1() {
 		currentX++;
 	}
 	else {
+		currentX = 0;
 		sparki.moveLeft(90);
 		sparki.moveForward(1);
 		sparki.moveLeft(90);
 	}
-	vis = lookAround()
+	int vis = lookAround();
 	if (vis == 1) {
 		return 1; //didn't find anything, going back to state 1 
 	}
@@ -64,7 +66,7 @@ int state1() {
 }
 
 int state2() {
-	color = readColor()
+	int color = readColor();
 	return 3;
 }
 
