@@ -1,12 +1,9 @@
 
 #include <Sparki.h>
-<<<<<<< Updated upstream
 //#include <Wire.h>
 #include "SparkFunISL29125.h"
-=======
 #include <Wire.h>
 #include "SFE_ISL29125.h"
->>>>>>> Stashed changes
 
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
@@ -18,12 +15,9 @@ int mapSizeX = 10; // ???
 int mapSizeY = 10; // ???
 int currentX = 0;
 int currentY = 0;
-/*
-void lookAround() {
-	//this function will be used to get ultrasound readings
-}
-*/
+
 SFE_ISL29125 RGB_sensor;
+
 void setup() {
 	//sparki.gripperOpen(); //do we want to specify a value here?	
         Serial.begin(115200);
@@ -31,48 +25,86 @@ void setup() {
         sparki.clearLCD();
 }
 
-void readColor() {
+void lookAround() {
+	dist = sparki.ping();
+	if (dist < 5) {
+		sparki.beep();
+		return 0
+	}
+	else {
+		return 1
+	}
+	//this function will be used to get ultrasound readings
+}
+
+int readColor() {
    unsigned int color = RGB_sensor.readStatus();
    Serial.println(color);
    sparki.updateLCD();
+   return color;
 }
 
+int state1() {
+	if (currentX < mapSizeX) {
+		sparki.moveForward(1);
+		currentX++;
+	}
+	else {
+		sparki.moveLeft(90);
+		sparki.moveForward(1);
+		sparki.moveLeft(90);
+	}
+	vis = lookAround()
+	if (vis == 1) {
+		return 1; //didn't find anything, going back to state 1 
+	}
+	else {
+		return 2; //found something! moving to state 2
+	}
+}
 
-void loop() {
-      readColor();
-	/*
+int state2() {
+	color = readColor()
+	return 3;
+}
+
+int state3() {
+	return 4;
+}
+
+int state4() {
+	return 5;
+}
+
+int state5() {
+	return 1;
+}
+
+void loop() { 
       if (state == 1) //search the map, only move to state 2 if an object is detected
 	{
-		if (ballLocationX == NULL) //hasn't found a ball yet... there is probably a cleaner way of doing this
-		{
-			ultrasound_reading = lookAround()
-			if (currentX < mapSizeX)
-			{
-				sparki.moveForward()
-			}	
-		}
+		state = state1();
 	}
 	else if (state == 2) 
 	{
-		//state 2
+		state = state2();
 	}
 	else if (state == 3)
 	{
-		//state 3
+		state = state3();
 	}
 	else if (state == 4)
 	{
-		//state 4
+		state = state4();
 	}
 	else if (state == 5)
 	{
-		//state 5
+		state = state5();
 	}
 	else
 	{
 		//all done!
 	}
-*/
 }	
 
 //State 1 : Jared
