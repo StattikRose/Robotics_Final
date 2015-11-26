@@ -27,7 +27,7 @@ void setup() {
 
 int lookAround() {
 	int dist = sparki.ping();
-	if (dist < 5) {
+	if (dist < 1) {
 		sparki.beep();
 		return 0;
 	}
