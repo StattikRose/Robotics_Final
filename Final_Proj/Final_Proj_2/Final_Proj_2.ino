@@ -14,16 +14,22 @@ int ballColor = NULL;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int state = 1;
-int mapSizeX = 1000; // ???
-int mapSizeY = 1000; // ???
+int mapSizeX = 60; // ???
+int mapSizeY = 60; // ???
 int theta = 0;
 int currentX = 0;
 int currentY = 0;
+int sbliX = 10; // ???
+int sbliY = 0; // ???
+int usTheta = 0;
+int usDir = 0;
+
 
 //SFE_ISL29125 RGB_sensor;
 
 void setup() {
 	//sparki.gripperOpen(); //do we want to specify a value here?	
+        sparki.servo(SERVO_CENTER)
         Serial.begin(115200);
         //RGB_sensor.init();
         sparki.clearLCD();
@@ -37,14 +43,28 @@ int lookAround() {
 	//as of right now, this function just gets the cm ultrasound reading
 	//perhaps we want him to swivel around and scope out whats good, i'll look into the math but it is probably easier to just have him look forward
 		//have to  
+
+        if (usDir == 0) { //move ultrasound left
+            usTheta--;
+            if (usTheta < -90) { //left boundary
+                usDir = 1; //switch dir
+                usTheta++; //move right
+            }
+        }
+        else { //move ultrasound right
+             usTheta++;
+             if (usTheta > 90) { //right boundary
+                 usDir = 0; //switch dir
+                 usTheta++; //move right
+             }
+        }
+        sparki.servo(usTheta);
 	int dist = sparki.ping();
 	delay(100); //what should this be?
-	if (dist < 3 && dist > 0) {
-                sparki.clearLCD();
-                sparki.println(dist);
-                sparki.updateLCD();
-		
-                //sparki.beep();
+        sparki.clearLCD();
+        sparki.println(dist);
+        sparki.updateLCD();
+	if (dist < 8 && dist > 0) {		
 		return 0; //grab it up 
 	}
 	else {
@@ -85,6 +105,16 @@ int state1() {
 }
 
 int state2() {
+        //this code will only work properly if it always runs after state 1 (after a ball is detected)  <-- have to make sure this works!
+        
+        //use usTheta to get sparkis ultrasound rotation
+        //we need to do a coordinate transformation to allow us to obtain the desired sparki rotation 
+        //the usTheta variable is relative to sparki, but the theta variable is relative to the map
+        //...or not? am i thinking about ^^^ this correctly?
+        if (usTheta < 0) {
+            sparki.moveRight(usTheta);
+            theta = theta - usTheta; 
+        }
 	int color = readColor();
 	return 3;
 }
@@ -107,11 +137,11 @@ int state5() {
 
 void loop() { 
 	//stuff for odometry
-	if (theta == -360) {
-		theta = 0; 
+	if (theta <= -360) {
+		theta = 0 - (360 + theta);  //someone check my math pls
 	}
-	else if (theta == 720) {
-		theta = 0;
+	else if (theta >= 360) {
+		theta = 0 + (theta - 360);
 	}
 
 	//main loop
