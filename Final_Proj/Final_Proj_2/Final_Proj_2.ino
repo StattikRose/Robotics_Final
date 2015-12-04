@@ -111,6 +111,7 @@ int state1() {
 }
 
 int state2() {
+        sparki.servo(SERVO_CENTER);
         //this code will only work properly if it always runs after state 1 (after a ball is detected)  <-- have to make sure this works!
         
         //use usTheta to get sparkis ultrasound rotation
