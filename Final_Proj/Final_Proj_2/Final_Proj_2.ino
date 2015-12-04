@@ -115,7 +115,15 @@ int state2() {
             sparki.moveRight(usTheta);
             theta = theta - usTheta; 
         }
-	int color = readColor();
+        else if (usTheta > 0) {
+            sparki.moveLeft(usTheta);
+            theta = theta + usTheta; 
+        } 
+        sparki.moveForward(1);   //IMPORTANT: this line ruins sparkis odometry estimate
+        //OH FUCK here is where we have to do some crazy math
+        //not even that crazy but still
+        //need to update sparkis currentX and currentY! might not be able to use ints for this anymore
+        int color = readColor();
 	return 3;
 }
 
