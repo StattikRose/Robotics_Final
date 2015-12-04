@@ -95,7 +95,7 @@ int state1() {
 		sparki.moveLeft(90);
 		theta = theta - 90;
 		sparki.moveForward(10);
-		currentX++;
+		currentY = currentY + 10;
 		sparki.moveLeft(90);
 		theta = theta - 90;
 	}
