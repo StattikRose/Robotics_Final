@@ -1,8 +1,7 @@
 
 #include <Sparki.h>
-//#include <Wire.h>
-//#include "SparkFunISL29125.h"
-//#include <Wire.h>
+#include "SparkFunISL29125.h"
+#include <Wire.h>
 //#include "SFE_ISL29125.h"
 
 //we should not be including wire.h twice. does the order in which the headers are included matter? 
@@ -19,18 +18,25 @@ int mapSizeY = 60; // ???
 int theta = 0;
 int currentX = 0;
 int currentY = 0;
+int foundX;
+int foundY;
 int sbliX = 10; // ???
 int sbliY = 0; // ???
 int usTheta = 0;
 int usDir = 0;
+int moveDist;
+int sweep = 5;
+int sweepThresh = 25;
 
 
-//SFE_ISL29125 RGB_sensor;
+SFE_ISL29125 RGB_sensor;
 
 void setup() {
-	//sparki.gripperOpen(); //do we want to specify a value here?	
-        sparki.servo(SERVO_CENTER)
-        Serial.begin(115200);
+	sparki.gripperOpen(); //do we want to specify a value here?	
+        delay(5000);
+        sparki.gripperStop();
+        sparki.servo(SERVO_CENTER);
+        //Serial.begin(115200);
         //RGB_sensor.init();
         sparki.clearLCD();
 }
@@ -40,22 +46,18 @@ void setup() {
 //but what should this delay be??
 
 int lookAround() {
-	//as of right now, this function just gets the cm ultrasound reading
-	//perhaps we want him to swivel around and scope out whats good, i'll look into the math but it is probably easier to just have him look forward
-		//have to  
-
         if (usDir == 0) { //move ultrasound left
-            usTheta--;
-            if (usTheta < -90) { //left boundary
+            usTheta = usTheta - sweep;
+            if (usTheta < -sweepThresh) { //left boundary
                 usDir = 1; //switch dir
-                usTheta++; //move right
+                usTheta = usTheta + sweep; //move right
             }
         }
         else { //move ultrasound right
-             usTheta++;
-             if (usTheta > 90) { //right boundary
+             usTheta = usTheta + sweep;
+             if (usTheta > sweepThresh) { //right boundary
                  usDir = 0; //switch dir
-                 usTheta++; //move right
+                 usTheta = usTheta - sweep; //move left
              }
         }
         sparki.servo(usTheta);
@@ -64,7 +66,8 @@ int lookAround() {
         sparki.clearLCD();
         sparki.println(dist);
         sparki.updateLCD();
-	if (dist < 8 && dist > 0) {		
+	if (dist < 15 && dist > 0) {
+                moveDist = dist;		
 		return 0; //grab it up 
 	}
 	else {
@@ -74,10 +77,11 @@ int lookAround() {
 }
 
 int readColor() {  //why is broken ):
-   //unsigned int color = RGB_sensor.readStatus();
-   //Serial.println(color);
-   //sparki.updateLCD();
-    unsigned int color = 0;
+   unsigned int color = RGB_sensor.readStatus();
+   sparki.print("color:");
+   sparki.println(color);
+   sparki.updateLCD();
+    //unsigned int color = 0;
     return color;
 }
 
@@ -100,6 +104,8 @@ int state1() {
 		return 1; //didn't find anything, going back to state 1 
 	}
 	else {
+                foundX = currentX;
+                foundY = currentY;
 		return 2; //found something! moving to state 2
 	}
 }
@@ -112,17 +118,22 @@ int state2() {
         //the usTheta variable is relative to sparki, but the theta variable is relative to the map
         //...or not? am i thinking about ^^^ this correctly?
         if (usTheta < 0) {
-            sparki.moveRight(usTheta);
+            sparki.moveRight(usTheta); //bad convention, attempting to compensate for (-) usTheta value
             theta = theta - usTheta; 
         }
         else if (usTheta > 0) {
-            sparki.moveLeft(usTheta);
+            sparki.moveRight(usTheta);
             theta = theta + usTheta; 
         } 
-        sparki.moveForward(1);   //IMPORTANT: this line ruins sparkis odometry estimate
+        sparki.print("theta");
+        sparki.println(theta);
+        sparki.moveForward(moveDist);   //IMPORTANT: this line ruins sparkis odometry estimate
         //OH FUCK here is where we have to do some crazy math
         //not even that crazy but still
         //need to update sparkis currentX and currentY! might not be able to use ints for this anymore
+        sparki.gripperClose();
+        delay(2000);
+        sparki.gripperStop();
         int color = readColor();
 	return 3;
 }
@@ -172,6 +183,7 @@ void loop() {
 	else if (state == 5)
 	{
 		state = state5();
+                delay(10000);
 	}
 	else
 	{
