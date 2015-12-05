@@ -20,6 +20,7 @@ int currentX = 0;
 int currentY = 0;
 int foundX;
 int foundY;
+int foundTheta;
 int sbliX = 10; // ???
 int sbliY = 0; // ???
 int usTheta = 0;
@@ -106,6 +107,7 @@ int state1() {
 	else {
                 foundX = currentX;
                 foundY = currentY;
+		foundTheta = theta;
 		return 2; //found something! moving to state 2
 	}
 }
@@ -148,6 +150,8 @@ int state4() {
 }
 
 int state5() {
+	//the location that sparki should return to is saved in the foundX and foundY vars. should we also include a foundTheta?
+	// ^^^ made the foundTheta var just incase
 	return 1;
 }
 
