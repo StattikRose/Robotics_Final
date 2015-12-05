@@ -41,6 +41,16 @@ void setup() {
         //RGB_sensor.init();
         sparki.clearLCD();
 }
+//because this function will need to return a lot of information, perhaps it is better to keep it void and just update global vars. thoughts?
+void planPath(int theta, int curX, int curY, int destX, int destY) {
+	//instead of adjusting the angle to point towards the dest, it will be much easier to just have him readjust to point towards the bins
+	int rotation = ??? // <-- need to compute the angle of rotation needed to point him towards the bins
+	// after rotating, he can just move horizontally and then vertically until he finds the right line with his ir
+	int slopeX = destX - curX;
+	int slopeY = destY - curY;
+	//do we want to return the x and y distances? we should def use a function for this because sparki is gonna have to plan a path several times 
+}
+
 
 //using the ultrasound sensor REQUIRES a delay b/c it takes a long time to get the results
 //right now the code is running faster than it takes for the ping to come back, which I think might solve the curse of the incessant beeping
@@ -142,6 +152,7 @@ int state2() {
 }
 
 int state3() {
+	//use pathPlan() function here?
 	return 4;
 }
 
@@ -150,6 +161,7 @@ int state4() {
 }
 
 int state5() {
+	//use pathPlan() function here?
 	//the location that sparki should return to is saved in the foundX and foundY vars. should we also include a foundTheta?
 	// ^^^ made the foundTheta var just incase
 	return 1;
@@ -188,7 +200,7 @@ void loop() {
 	else if (state == 5)
 	{
 		state = state5();
-                delay(10000);
+                delay(10000); //here b/c none of the other code is written so he just keeps looping back to states 1 and 2
 	}
 	else
 	{
@@ -203,12 +215,12 @@ void loop() {
 //State 3 : Zack
 
 //State 4 : Jen
-	//Move from SBLI (South bin line intersection) to (0,0) cornor 
+	//Move from SBLI (South bin line intersection) to (0,0) corner 
 	//Resets odometry using localization
 
 	//Split CCL (color coded line) into 3 regions and grey scale (or color)
 	//each reagion to corrispond, use IR scanner on bottom of sparki to 
-	//recognize the "color". When section that corrisponds to the ball
+	//recognize the "color". When section that corresponds to the ball
 	//color is found sparki deposits ball
 
 	//Sparki turns around and follows CCL to (0,0) then returns to SBLI  
@@ -217,7 +229,7 @@ void loop() {
 	// Sparki moves from SBLI to the coordinates of the last location 
 	// of where Sparki spotted the ball.
 	
-	// Clear global variables
+	// Clear global variables <-- only a few tho right...
 	
 	// Sparki will resume its patterned search in state 1
 	
