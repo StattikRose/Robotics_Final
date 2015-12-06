@@ -44,7 +44,7 @@ void setup() {
 //because this function will need to return a lot of information, perhaps it is better to keep it void and just update global vars. thoughts?
 void planPath(int theta, int curX, int curY, int destX, int destY) {
 	//instead of adjusting the angle to point towards the dest, it will be much easier to just have him readjust to point towards the bins
-	int rotation = ??? // <-- need to compute the angle of rotation needed to point him towards the bins
+	int rotation = 0; //??? // <-- need to compute the angle of rotation needed to point him towards the bins
 	// after rotating, he can just move horizontally and then vertically until he finds the right line with his ir
 	int slopeX = destX - curX;
 	int slopeY = destY - curY;
@@ -157,6 +157,9 @@ int state3() {
 }
 
 int state4() {
+        sparki.gripperOpen();
+        delay(3000);
+        sparki.gripperStop();
 	return 5;
 }
 
@@ -164,7 +167,7 @@ int state5() {
 	//use pathPlan() function here?
 	//the location that sparki should return to is saved in the foundX and foundY vars. should we also include a foundTheta?
 	// ^^^ made the foundTheta var just incase
-	return 1;
+        return 1;
 }
 
 //this might not be the best way of organizing our code. perhaps a class would be better? i.e a search class or something?
@@ -200,7 +203,7 @@ void loop() {
 	else if (state == 5)
 	{
 		state = state5();
-                delay(10000); //here b/c none of the other code is written so he just keeps looping back to states 1 and 2
+                delay(5000); //here b/c none of the other code is written so he just keeps looping back to states 1 and 2
 	}
 	else
 	{
