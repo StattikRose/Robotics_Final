@@ -1,11 +1,8 @@
 
-#include <Sparki.h>
-#include "SparkFunISL29125.h"
-#include <Wire.h>
+include <Sparki.h>
+include "SparkFunISL29125.h"
+include <Wire.h>
 //#include "SFE_ISL29125.h"
-
-//we should not be including wire.h twice. does the order in which the headers are included matter? 
-//need to put the libraries in our github repo so that everyone can access 
 
 //Global variables
 //Feel free to change or add some, was just getting an idea of things
@@ -33,12 +30,15 @@ int sweepThresh = 25;
 SFE_ISL29125 RGB_sensor;
 
 void setup() {
+	sparki.clearLCD();
+	sparki.println("running setup...");
+	sparki.updateLCD();
 	sparki.gripperOpen(); //do we want to specify a value here?	
         delay(5000);
         sparki.gripperStop();
         sparki.servo(SERVO_CENTER);
-        //Serial.begin(115200);
-        //RGB_sensor.init();
+        Serial.begin(115200);
+        RGB_sensor.init();
         sparki.clearLCD();
 }
 //because this function will need to return a lot of information, perhaps it is better to keep it void and just update global vars. thoughts?
@@ -75,7 +75,8 @@ int lookAround() {
 	int dist = sparki.ping();
 	delay(100); //what should this be?
         sparki.clearLCD();
-        sparki.println(dist);
+        sparki.println("Ultrasound Reading");
+	sparki.print(dist);
         sparki.updateLCD();
 	if (dist < 15 && dist > 0) {
                 moveDist = dist;		
@@ -88,6 +89,7 @@ int lookAround() {
 }
 
 int readColor() {  //why is broken ):
+   sparki.println("reading color...");
    unsigned int color = RGB_sensor.readStatus();
    sparki.print("color:");
    sparki.println(color);
@@ -115,6 +117,8 @@ int state1() {
 		return 1; //didn't find anything, going back to state 1 
 	}
 	else {
+		sparki.println("object found"); 
+		sparki.updateLCD();
                 foundX = currentX;
                 foundY = currentY;
 		foundTheta = theta;
@@ -186,7 +190,10 @@ void loop() {
 	//main loop
       	if (state == 1) //search the map, only move to state 2 if an object is detected
 	{
+		sparki.println("searching for objects...");
+		sparki.updateLCD();
 		state = state1();
+		sparki.clearLCD();
 	}
 	else if (state == 2) 
 	{
