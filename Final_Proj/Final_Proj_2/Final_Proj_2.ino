@@ -1,7 +1,7 @@
 
-include <Sparki.h>
-include "SparkFunISL29125.h"
-include <Wire.h>
+#include <Sparki.h>
+#include "SparkFunISL29125.h"
+#include <Wire.h>
 //#include "SFE_ISL29125.h"
 
 //Global variables
@@ -26,6 +26,13 @@ int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
 
+int GRAY = 0;
+int WHITE = 0;
+int BLACK = 0;
+int BinY = 0;
+int RED;
+int GREEN;
+int BLUE;
 
 SFE_ISL29125 RGB_sensor;
 
@@ -161,7 +168,7 @@ int state3() {
 }
 
 int state4() {
-		int colorStripStart = spark.lineCenter();
+		int colorStripStart = sparki.lineCenter();
 		int colorStripEnd = sparki.lineCenter();
 		//Based on current IR reading move to an interstection
 		//White
@@ -190,7 +197,7 @@ int state4() {
 		}
 		//Once interstection is reached fix odometry
 		//Started in White or Grey
-		if(colorStripStart > GREY || colorStripStart > BLACK){
+		if(colorStripStart > GRAY || colorStripStart > BLACK){
 			currentX = "LOWER INTERSECTION X";
 			currentY = "LOWER INTERSECTION Y";
 		}
@@ -202,18 +209,22 @@ int state4() {
 
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
-		if(ballColor == ){
+		if(ballColor == RED){
 			moveDist = currentY - BinY;
 		}
-		else if(ballColor == ){
+		else if(ballColor == GREEN){
 			moveDist = currentY - BinY;
 		}
-		else{
+		else if(ballColor == BLUE){
 			moveDist = currentY - BinY;
 		}
+                else {
+                        sparki.println("unrecognized color");
+                        sparki.updateLCD(); 
+                }
 
 		if(moveDist < 0){
-			sparki.moveRight(180)
+			sparki.moveRight(180);
 		}
 		sparki.moveForward(moveDist)
 
