@@ -10,8 +10,8 @@ int ballColor = NULL;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int state = 1;
-int mapSizeX = 60; // ???
-int mapSizeY = 60; // ???
+int mapSizeX = 46; // ???
+int mapSizeY = 46; // ???
 int theta = 0;
 int currentX = 0;
 int currentY = 0;
@@ -25,14 +25,14 @@ int usDir = 0;
 int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
-
-int GRAY = 0;
-int WHITE = 0;
-int BLACK = 0;
-int BinY = 0;
-int RED;
-int GREEN;
-int BLUE;
+int state1Dir = 0;
+int gray = NULL;
+int white = NULL;
+int black = NULL;
+int BinY = NULL;
+int red = NULL;
+int green = NULL;
+int blue = NULL;
 
 SFE_ISL29125 RGB_sensor;
 
@@ -111,6 +111,7 @@ int state1() {
 		currentX++;
 	}
 	else {
+                if (state1Dir == 0) {
 		currentX = 0;
 		sparki.moveLeft(90);
 		theta = theta - 90;
@@ -118,6 +119,18 @@ int state1() {
 		currentY = currentY + 10;
 		sparki.moveLeft(90);
 		theta = theta - 90;
+                state1Dir = 1;
+                }
+                else {
+		currentX = 0;
+		sparki.moveRight(90);
+		theta = theta + 90;
+		sparki.moveForward(10);
+		currentY = currentY + 10;
+		sparki.moveRight(90);
+		theta = theta + 90;
+                state1Dir = 0;
+                }
 	}
 	int vis = lookAround();
 	if (vis == 1) {
@@ -129,7 +142,8 @@ int state1() {
                 foundX = currentX;
                 foundY = currentY;
 		foundTheta = theta;
-		return 2; //found something! moving to state 2
+                lookAround();
+      		return 2; //found something! moving to state 2
 	}
 }
 
@@ -156,15 +170,61 @@ int state2() {
         //not even that crazy but still
         //need to update sparkis currentX and currentY! might not be able to use ints for this anymore
         sparki.gripperClose();
-        delay(2000);
+        delay(3000);
         sparki.gripperStop();
         int color = readColor();
 	return 3;
 }
 
+// So, Sparki has an identified object in his hands
+// Need to proceed to the SBLI
 int state3() {
-	//use pathPlan() function here?
-	return 4;
+  // Determine the necessary rotation to get Sparki facing Down
+  int wantedTheta = -180;
+  int Turn = wantedTheta-theta;
+  if (abs(theta) < 90) {
+    sparki.moveLeft(Turn);
+  }
+  else {
+    sparki.moveRight(Turn);
+  }
+  int sbli1 = findSBLI();
+  return 4;
+}
+  
+  
+  
+int findSBLI() {
+  // THRESHOLD BASED ON IR FROM WOOD
+  int threshold = sparki.lineCenter();
+  
+  // BOOLEAN FLAG TO TELL SPARKI SBLI NOT FOUND
+  int flag = 1;
+  
+  // UNTIL SBLI LINE
+  while(flag) {
+    // MOVE FORWARD
+    sparki.moveForward(1);
+    
+    // CHECK IR READINGS
+    int curIR = sparki.lineCenter();
+    
+    // IF SUFFICIENT CHANGE IN IR READING
+    if (abs(curIR - threshold) > 50) {
+          flag = 0;
+    }   
+  }
+  
+  // ALLIGN SPARKI'S WHEEL WITH THE SBLI LINE 
+  // MEASURE DISTANCE FROM IR TO WHEEL
+  int senseSBLI = 2.2;
+  sparki.moveForward(senseSBLI);
+  
+  // TURN SPARKI TO ALLIGN WITH THE SBLI
+  sparki.motorRotate(MOTOR_LEFT, DIR_CCW, 100);
+  delay(200);
+  sparki.motorStop(MOTOR_LEFT);
+  return 4;
 }
 
 int state4() {
@@ -172,17 +232,17 @@ int state4() {
 		int colorStripEnd = sparki.lineCenter();
 		//Based on current IR reading move to an interstection
 		//White
-		if(colorStripStart > GREY){
+		if(colorStripStart > gray){
 			sparki.moveRight(90);
-			while(colorStripEnd > GREY){
+			while(colorStripEnd > gray){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
 		}
 		//Grey
-		else if(colorStripStart > BLACK){
+		else if(colorStripStart > black){
 			sparki.moveLeft(90);
-			while(colorStripEnd < WHITE){
+			while(colorStripEnd < white){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
@@ -190,32 +250,32 @@ int state4() {
 		//Black
 		else{
 			sparki.moveLeft(90);
-			while(colorStripEnd < GRAY){
+			while(colorStripEnd < gray){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
 		}
 		//Once interstection is reached fix odometry
 		//Started in White or Grey
-		if(colorStripStart > GRAY || colorStripStart > BLACK){
-			currentX = "LOWER INTERSECTION X";
-			currentY = "LOWER INTERSECTION Y";
+		if(colorStripStart > gray || colorStripStart > black){
+			currentX =  10;// "LOWER INTERSECTION X";
+			currentY =  25;//"LOWER INTERSECTION Y";
 		}
 		//Started in Black
 		else{
-			currentX = "UPPER INTERSECTION X";
-			currentY = "UPPER INTERSECTION Y";
+			currentX =  10;//"UPPER INTERSECTION X";
+			currentY =  50;//"UPPER INTERSECTION Y";
 		}
 
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
-		if(ballColor == RED){
+		if(ballColor == red){
 			moveDist = currentY - BinY;
 		}
-		else if(ballColor == GREEN){
+		else if(ballColor == green){
 			moveDist = currentY - BinY;
 		}
-		else if(ballColor == BLUE){
+		else if(ballColor == blue){
 			moveDist = currentY - BinY;
 		}
                 else {
@@ -226,7 +286,7 @@ int state4() {
 		if(moveDist < 0){
 			sparki.moveRight(180);
 		}
-		sparki.moveForward(moveDist)
+		sparki.moveForward(moveDist);
 
 		//Move so that grippers are over the bin
 		//Move left or right then forward
