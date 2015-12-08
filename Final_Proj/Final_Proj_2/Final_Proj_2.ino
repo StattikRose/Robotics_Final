@@ -41,6 +41,7 @@ void setup() {
         RGB_sensor.init();
         sparki.clearLCD();
 }
+
 //because this function will need to return a lot of information, perhaps it is better to keep it void and just update global vars. thoughts?
 void planPath(int theta, int curX, int curY, int destX, int destY) {
 	//instead of adjusting the angle to point towards the dest, it will be much easier to just have him readjust to point towards the bins
@@ -50,7 +51,6 @@ void planPath(int theta, int curX, int curY, int destX, int destY) {
 	int slopeY = destY - curY;
 	//do we want to return the x and y distances? we should def use a function for this because sparki is gonna have to plan a path several times 
 }
-
 
 //using the ultrasound sensor REQUIRES a delay b/c it takes a long time to get the results
 //right now the code is running faster than it takes for the ping to come back, which I think might solve the curse of the incessant beeping
@@ -161,6 +161,68 @@ int state3() {
 }
 
 int state4() {
+		int colorStripStart = spark.lineCenter();
+		int colorStripEnd = sparki.lineCenter();
+		//Based on current IR reading move to an interstection
+		//White
+		if(colorStripStart > GREY){
+			sparki.moveRight(90);
+			while(colorStripEnd > GREY){
+				sparki.moveForward();
+				colorStripEnd = sparki.lineCenter();
+			}
+		}
+		//Grey
+		else if(colorStripStart > BLACK){
+			sparki.moveLeft(90);
+			while(colorStripEnd < WHITE){
+				sparki.moveForward();
+				colorStripEnd = sparki.lineCenter();
+			}
+		}
+		//Black
+		else{
+			sparki.moveLeft(90);
+			while(colorStripEnd < GRAY){
+				sparki.moveForward();
+				colorStripEnd = sparki.lineCenter();
+			}
+		}
+		//Once interstection is reached fix odometry
+		//Started in White or Grey
+		if(colorStripStart > GREY || colorStripStart > BLACK){
+			currentX = "LOWER INTERSECTION X";
+			currentY = "LOWER INTERSECTION Y";
+		}
+		//Started in Black
+		else{
+			currentX = "UPPER INTERSECTION X";
+			currentY = "UPPER INTERSECTION Y";
+		}
+
+		//Find the correct bin (ball color corrisponds to greyscale)
+		int moveDist = 0;
+		if(ballColor == ){
+			moveDist = currentY - BinY;
+		}
+		else if(ballColor == ){
+			moveDist = currentY - BinY;
+		}
+		else{
+			moveDist = currentY - BinY;
+		}
+
+		if(moveDist < 0){
+			sparki.moveRight(180)
+		}
+		sparki.moveForward(moveDist)
+
+		//Move so that grippers are over the bin
+		//Move left or right then forward
+		
+
+
+		//Deliver ball
         sparki.gripperOpen();
         delay(3000);
         sparki.gripperStop();
@@ -217,33 +279,3 @@ void loop() {
 		//all done!
 	}
 }	
-
-//State 1 : Jared
-
-//State 2 : Brian K.
-
-//State 3 : Zack
-
-//State 4 : Jen
-	//Move from SBLI (South bin line intersection) to (0,0) corner 
-	//Resets odometry using localization
-
-	//Split CCL (color coded line) into 3 regions and grey scale (or color)
-	//each reagion to corrispond, use IR scanner on bottom of sparki to 
-	//recognize the "color". When section that corresponds to the ball
-	//color is found sparki deposits ball
-
-	//Sparki turns around and follows CCL to (0,0) then returns to SBLI  
-
-//State 5 : Brian S.
-	// Sparki moves from SBLI to the coordinates of the last location 
-	// of where Sparki spotted the ball.
-	
-	// Clear global variables <-- only a few tho right...
-	
-	// Sparki will resume its patterned search in state 1
-	
-	
-
-//State 6 : All
-
