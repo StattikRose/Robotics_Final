@@ -98,10 +98,10 @@ int readColor() {
    unsigned int red = RGB_sensor.readRed();
    unsigned int green = RGB_sensor.readGreen();
    unsigned int blue = RGB_sensor.readBlue();
-   sparki.print("color:");
-   sparki.println(red);
-   sparki.println(green);
-   sparki.println(blue);
+   //sparki.print("color:");
+   //sparki.println(red);
+   //sparki.println(green);
+   //sparki.println(blue);
    sparki.updateLCD();
    String color;
    if (red > 100 && green > 100 && blue > 100) {
@@ -114,6 +114,7 @@ int readColor() {
          color = "blue";  
    }
    sparki.println(color);
+   sparki.updateLCD();
    delay(3000);
    ballColor = color;
 }
@@ -238,12 +239,12 @@ int findSBLI() {
     int curIR = sparki.lineCenter();
     
     // IF SUFFICIENT CHANGE IN IR READING
-    if (abs(curIR - threshold) > 50) {
+    if (abs(curIR - threshold) > 500) {
           flag = 0;
     }   
   }
   
-  // ALLIGN SPARKI'S WHEEL WITH THE SBLI LINE 
+  // ALIGN SPARKI'S WHEEL WITH THE SBLI LINE 
   // MEASURE DISTANCE FROM IR TO WHEEL
   int senseSBLI = 2.2;
   sparki.moveForward(senseSBLI);
