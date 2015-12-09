@@ -4,7 +4,7 @@
 //#include "SFE_ISL29125.h"
 
 //Global variables
-String ballColor = NULL;
+String ballColor;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int state = 1;
@@ -114,7 +114,7 @@ int readColor() {
          color = "blue";  
    }
    sparki.println(color);
-   return color;
+   ballColor = color;
 }
 
 int state1() {
@@ -147,7 +147,6 @@ int state1() {
         		sparki.moveRight(90);
         		theta = theta + 90;
                         state1Dir = 0;
-                        }
         	}  
         }
 	int vis = lookAround();
@@ -160,9 +159,24 @@ int state1() {
                 foundX = currentX;
                 foundY = currentY;
 		foundTheta = theta;
-                checkVis = lookAround();
-      		return 2; //found something! moving to state 2
-	}
+                int checkVis = lookAround();
+                if (checkVis == 1) {
+                    int wantedTheta = foundTheta;
+                    int Turn = wantedTheta-theta;
+                    if (abs(theta) < 90) {
+                          sparki.moveLeft(Turn);
+                    }
+                    else {
+                          sparki.moveRight(Turn);
+                    }
+                    sparki.println("oops!");
+                    sparki.updateLCD();
+                    return 1; //oops!
+                }
+                else {
+      		    return 2; //found something! moving to state 2
+                }      
+	} 
 }
 
 int state2() {
@@ -187,7 +201,7 @@ int state2() {
         sparki.gripperClose();
         delay(3000);
         sparki.gripperStop();
-        ballColor = readColor(); 
+        readColor(); 
 	return 3;
 }
 
