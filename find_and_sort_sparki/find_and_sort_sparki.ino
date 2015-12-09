@@ -114,6 +114,7 @@ int readColor() {
          color = "blue";  
    }
    sparki.println(color);
+   delay(3000);
    ballColor = color;
 }
 
