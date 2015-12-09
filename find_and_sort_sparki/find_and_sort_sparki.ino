@@ -1,17 +1,15 @@
-
 #include <Sparki.h>
 #include "SparkFunISL29125.h"
 #include <Wire.h>
 //#include "SFE_ISL29125.h"
 
 //Global variables
-//Feel free to change or add some, was just getting an idea of things
-int ballColor = NULL;
+String ballColor = NULL;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int state = 1;
-int mapSizeX = 46; // ???
-int mapSizeY = 46; // ???
+int mapSizeX = 46; 
+int mapSizeY = 46; 
 int theta = 0;
 int currentX = 0;
 int currentY = 0;
@@ -33,6 +31,7 @@ int BinY = NULL;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
+int moveDir = 0;
 
 SFE_ISL29125 RGB_sensor;
 
@@ -91,47 +90,66 @@ int lookAround() {
 	}
 	else {
 		return 1; //no grab 
-	}
-	
+	}	
 }
 
-int readColor() {  //why is broken ):
+int readColor() {  
    sparki.println("reading color...");
-   unsigned int color = RGB_sensor.readStatus();
+   unsigned int red = RGB_sensor.readRed();
+   unsigned int green = RGB_sensor.readGreen();
+   unsigned int blue = RGB_sensor.readBlue();
    sparki.print("color:");
-   sparki.println(color);
+   sparki.println(red);
+   sparki.println(green);
+   sparki.println(blue);
    sparki.updateLCD();
-    //unsigned int color = 0;
-    return color;
+   String color;
+   if (red > 100 && green > 100 && blue > 100) {
+         color = "mint";
+   }
+   else if (blue < 100) {
+         color = "pink";  
+   }
+   else {
+         color = "blue";  
+   }
+   sparki.println(color);
+   return color;
 }
 
 int state1() {
-	if (currentX < mapSizeX) {
-		sparki.moveForward(1);
-		currentX++;
-	}
-	else {
-                if (state1Dir == 0) {
-		currentX = 0;
-		sparki.moveLeft(90);
-		theta = theta - 90;
-		sparki.moveForward(10);
-		currentY = currentY + 10;
-		sparki.moveLeft(90);
-		theta = theta - 90;
-                state1Dir = 1;
-                }
-                else {
-		currentX = 0;
-		sparki.moveRight(90);
-		theta = theta + 90;
-		sparki.moveForward(10);
-		currentY = currentY + 10;
-		sparki.moveRight(90);
-		theta = theta + 90;
-                state1Dir = 0;
-                }
-	}
+        if (moveDir == 0) {
+        	if (currentX < mapSizeX) {
+        		sparki.moveForward(1);
+        		currentX++;
+        	}
+        	else {
+                        moveDir = 1;
+        		sparki.moveLeft(90);
+        		theta = theta - 90;
+        		sparki.moveForward(10);
+        		currentY = currentY + 10;
+        		sparki.moveLeft(90);
+        		theta = theta - 90;
+        	}
+        }
+        else {
+                if (currentX > 0) {
+        		sparki.moveForward(1);
+        		currentX--;
+        	}
+        	else {
+                        moveDir = 0;
+        		sparki.moveRight(90);
+        		theta = theta + 90;
+        		sparki.moveForward(10);
+        		currentY = currentY + 10;
+        		sparki.moveRight(90);
+        		theta = theta + 90;
+                        state1Dir = 0;
+                        }
+        	}  
+        }
 	int vis = lookAround();
 	if (vis == 1) {
 		return 1; //didn't find anything, going back to state 1 
@@ -142,7 +160,7 @@ int state1() {
                 foundX = currentX;
                 foundY = currentY;
 		foundTheta = theta;
-                lookAround();
+                checkVis = lookAround();
       		return 2; //found something! moving to state 2
 	}
 }
@@ -156,23 +174,20 @@ int state2() {
         //the usTheta variable is relative to sparki, but the theta variable is relative to the map
         //...or not? am i thinking about ^^^ this correctly?
         if (usTheta < 0) {
-            sparki.moveRight(usTheta); //bad convention, attempting to compensate for (-) usTheta value
+            sparki.moveRight(usTheta); //attempting to compensate for (-) usTheta value
             theta = theta - usTheta; 
         }
         else if (usTheta > 0) {
             sparki.moveRight(usTheta);
             theta = theta + usTheta; 
         } 
-        sparki.print("theta");
+        sparki.print("theta:");
         sparki.println(theta);
-        sparki.moveForward(moveDist);   //IMPORTANT: this line ruins sparkis odometry estimate
-        //OH FUCK here is where we have to do some crazy math
-        //not even that crazy but still
-        //need to update sparkis currentX and currentY! might not be able to use ints for this anymore
+        sparki.moveForward(moveDist);
         sparki.gripperClose();
         delay(3000);
         sparki.gripperStop();
-        int color = readColor();
+        ballColor = readColor(); 
 	return 3;
 }
 
@@ -191,8 +206,6 @@ int state3() {
   int sbli1 = findSBLI();
   return 4;
 }
-  
-  
   
 int findSBLI() {
   // THRESHOLD BASED ON IR FROM WOOD
@@ -269,20 +282,22 @@ int state4() {
 
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
-		if(ballColor == red){
+		if(ballColor == "mint"){
 			moveDist = currentY - BinY;
+                        sparki.println("moving to mint bin..");
 		}
-		else if(ballColor == green){
+		else if(ballColor == "pink"){
 			moveDist = currentY - BinY;
+                        sparki.println("moving to pink bin...");
 		}
-		else if(ballColor == blue){
+		else if(ballColor == "blue"){
 			moveDist = currentY - BinY;
+                        sparki.println("moving to blue bin...");
 		}
                 else {
-                        sparki.println("unrecognized color");
-                        sparki.updateLCD(); 
+                        sparki.println("unrecognized color"); 
                 }
-
+                sparki.updateLCD();
 		if(moveDist < 0){
 			sparki.moveRight(180);
 		}
@@ -307,10 +322,6 @@ int state5() {
         return 1;
 }
 
-//this might not be the best way of organizing our code. perhaps a class would be better? i.e a search class or something?
-//because the code takes so long to execute he looks mad jerky
-//which might be because sparki is unnecessarily looping through code here when he thinks he sees something which is all the time T_T
-
 void loop() { 
 	//stuff for odometry
 	if (theta <= -360) {
@@ -330,23 +341,38 @@ void loop() {
 	}
 	else if (state == 2) 
 	{
+                sparki.println("collecting object and reading color...");
+		sparki.updateLCD();
 		state = state2();
-	}
+                sparki.clearLCD();
+        }
 	else if (state == 3)
 	{
+                sparki.println("returning to bins...");
+		sparki.updateLCD();
 		state = state3();
+                sparki.clearLCD();
 	}
 	else if (state == 4)
 	{
+                sparki.println("finding correct bin...");
+		sparki.updateLCD();
 		state = state4();
+                sparki.clearLCD();
 	}
 	else if (state == 5)
 	{
+                sparki.println("returning to previous location...");
+		sparki.updateLCD();
 		state = state5();
-                delay(5000); //here b/c none of the other code is written so he just keeps looping back to states 1 and 2
+                sparki.clearLCD();
 	}
 	else
 	{
+                sparki.println("partying...");
+		sparki.updateLCD();
+                sparki.moveLeft(90); //spin game strong
+                sparki.clearLCD();
 		//all done!
 	}
 }	
