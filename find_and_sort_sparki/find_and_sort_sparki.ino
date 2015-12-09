@@ -24,10 +24,12 @@ int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
 int state1Dir = 0;
-int gray = NULL;
 int white = NULL;
-int black = NULL;
-int BinY = NULL;
+int blue = NULL;
+int pink = NULL;
+int whiteBinY = NULL;
+int blueBinY = NULL;
+int pinkBinY = NULL;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
@@ -261,7 +263,6 @@ int state4() {
 		//Based on current IR reading move to an interstection
 		//White
 		if(colorStripStart > gray){
-			sparki.moveRight(90);
 			while(colorStripEnd > gray){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
@@ -269,7 +270,6 @@ int state4() {
 		}
 		//Grey
 		else if(colorStripStart > black){
-			sparki.moveLeft(90);
 			while(colorStripEnd < white){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
@@ -277,7 +277,6 @@ int state4() {
 		}
 		//Black
 		else{
-			sparki.moveLeft(90);
 			while(colorStripEnd < gray){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
@@ -370,7 +369,11 @@ void loop() {
 	}
 	else if (state == 4)
 	{
+<<<<<<< Updated upstream:find_and_sort_sparki/find_and_sort_sparki.ino
                 sparki.println("finding correct bin...");
+=======
+		parki.println("Starting state 4...");
+>>>>>>> Stashed changes:Final_Proj/Final_Proj_2/Final_Proj_2.ino
 		sparki.updateLCD();
 		state = state4();
                 sparki.clearLCD();
