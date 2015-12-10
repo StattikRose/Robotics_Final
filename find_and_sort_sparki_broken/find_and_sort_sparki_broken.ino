@@ -4,7 +4,7 @@
 //#include "SFE_ISL29125.h"
 
 //Global variables
-String ballColor = "";
+String ballColor;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
 int state = 0;
