@@ -396,14 +396,6 @@ void searchNsortSparki::updateOdometry(int moveX, int moveY, int moveTheta){
 	currentX = currentX + moveX;
 	currentY = currentY + moveY;
 	currentTheta = currentTheta + moveTheta;
-
-	//stuff for odometry
-	if (theta <= -360) {
-		theta = 0 - (360 + theta);  //someone check my math pls
-	}
-	else if (theta >= 360) {
-		theta = 0 + (theta - 360);
-	}
 }
 
 void searchNsortSparki::updateOdometry(int moveTheta){

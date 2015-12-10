@@ -25,6 +25,7 @@ void loop() {
     sNs.printLocation();
     sparki.updateLCD();
 
+
 	//main loop 
 	//calibrate
     if (sNs.state == 0){
