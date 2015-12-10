@@ -7,7 +7,7 @@
 String ballColor;
 int ballLocationX = NULL;
 int ballLocationY = NULL;
-int state = 1;
+int state = 0;
 int mapSizeX = 46; 
 int mapSizeY = 56; 
 int theta = 0;
@@ -22,15 +22,22 @@ int usTheta = 0;
 int usDir = 0;
 int moveDist;
 int sweep = 5;
-int sweepThresh = 25;
+int sweepThresh = 35;
 int state1Dir = 0;
-int mintBinY = 15;
-int blueBinY = 25;
-int pinkBinY = 5;
+int mintBinY = 37;
+int blueBinY = 61;
+int pinkBinY = 13;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
 int moveDir = 0;
+
+int pinkIR = NULL;
+int whiteIR = NULL;
+int blueIR = NULL;
+int pinkColor = NULL;
+int whiteColor = NULL;
+int blueColor = NULL;
 
 SFE_ISL29125 RGB_sensor;
 
@@ -113,6 +120,34 @@ int readColor() {
    sparki.updateLCD();
    delay(3000);
    ballColor = color;
+   return sum;
+}
+
+int state0() {
+// /------^-----\
+// |            |
+// | 69  70  71 |
+// | 68  64  67 |
+// |  7  21   9 |
+// | 22  25  13 |
+// | 12  24  94 |
+// |  8  28  90 |
+// | 66  82  74 |
+// \____________/
+      int code = sparki.readIR();
+      switch(code){
+      case 12: pinkIR = sparki.lineCenter(); break;
+      case 24: whiteIR = sparki.lineCenter(); break;
+      case 94: blueIR = sparki.lineCenter(); break;
+      case 8: pinkColor = readColor(); break;
+      case 28: whiteColor = readColor(); break;
+      case 90: blueColor = readColor(); break;
+      case 64: return 1; break;
+      
+      default:
+        break;
+      }
+      return 0;
 }
 
 int state1() {
@@ -129,6 +164,7 @@ int state1() {
         		currentY = currentY + 10;
         		sparki.moveLeft(90);
         		theta = theta - 90;
+                        sparki.servo(SERVO_CENTER);
         	}
         }
         else {
@@ -144,7 +180,7 @@ int state1() {
         		currentY = currentY + 10;
         		sparki.moveRight(90);
         		theta = theta + 90;
-                        state1Dir = 0;
+                        sparki.servo(SERVO_CENTER);
         	}  
         }
 	int vis = lookAround();
@@ -216,8 +252,8 @@ int state3() {
   // Determine the necessary rotation to get Sparki facing Down
   int wantedTheta = -180;
   int Turn = wantedTheta-theta;
-  if (abs(theta) < 90) {
-    sparki.moveLeft(Turn);
+  if (abs(theta) < 180) {
+    sparki.moveRight(Turn);
   }
   else {
     sparki.moveLeft(Turn);
@@ -258,58 +294,60 @@ int findSBLI() {
 }
 
 int state4() {
-		int colorStripStart = sparki.lineLeft();
-		int colorStripEnd = sparki.lineLeft();
+		int colorStripStart = sparki.edgeLeft();
+		int colorStripEnd = sparki.edgeLeft();
                 sparki.println(colorStripEnd);
                 sparki.updateLCD();
 		//Based on current IR reading move to an interstection
 		//Pink
-		if(colorStripStart < 970 && currentY <= mapSizeY/2){
-			while(colorStripEnd < 970){
+		if(colorStripStart < 960 && currentY <= mapSizeY/2){
+			while(colorStripEnd < 960){
 				sparki.moveForward(1);
                                 currentY++;
-				colorStripEnd = sparki.lineLeft();
+				colorStripEnd = sparki.edgeLeft();
                                 sparki.println(colorStripEnd);
                                 sparki.updateLCD();
 			}
 		}
 		//Mint
-		else if(colorStripStart >= 970){
-			while(colorStripEnd >= 970){
+		else if(colorStripStart >= 960){
+			while(colorStripEnd >= 960){
 				sparki.moveForward(1);
                                 currentY++;
-				colorStripEnd = sparki.lineLeft();
+				colorStripEnd = sparki.edgeLeft();
                                 sparki.println(colorStripEnd);
                                 sparki.updateLCD();
 			}
 		}
 		//Blue
 		else if(currentY >= mapSizeY/2){
-			while(colorStripEnd < 970){
+			while(colorStripEnd < 960){
 				sparki.moveBackward(1);
                                 currentY--;
-				colorStripEnd = sparki.lineLeft();
+				colorStripEnd = sparki.edgeLeft();
                                 sparki.println(colorStripEnd);
                                 sparki.updateLCD();
 			}
 		}
+                sparki.println("Found");
+                sparki.updateLCD();
 		//Once interstection is reached fix odometry
-		//Started in White or Grey
+		//Started in pink
 		if(currentY <= mapSizeY/2){
-			currentX =  10;// "LOWER INTERSECTION X";
-			currentY =  25;//"LOWER INTERSECTION Y";
+			currentX =  0;// "LOWER INTERSECTION X";
+			currentY =  26;//"LOWER INTERSECTION Y";
 		}
-		//Started in Black
+		//Started in white or blue
 		else{
-			currentX =  10;//"UPPER INTERSECTION X";
+			currentX =  0;//"UPPER INTERSECTION X";
 			currentY =  50;//"UPPER INTERSECTION Y";
 		}
 
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
-		if(ballColor == "mint"){
+		if(ballColor == "white"){
 			moveDist = mintBinY - currentY;
-                        sparki.println("moving to mint bin..");
+                        sparki.println("moving to white bin..");
 		}
 		else if(ballColor == "pink"){
 			moveDist = pinkBinY - currentY;
@@ -364,17 +402,19 @@ int state5() {
 	// Return to SBLI line?
 	
 	//Return to original position:
-	sparki.moveRight(180);
-	while(currentX < foundX){
-		sparki.moveForward(1);
-		currentX++;
-	}
+	//sparki.moveRight(180);
+	
 	if(currentY < foundY){
 		sparki.moveLeft(90);
 		while(currentY < foundY){
 			sparki.moveForward(1);
 			currentY++;
 		}
+                sparki.moveRight(90);
+                while(currentX < foundX){
+                  sparki.moveForward(1);
+                  currentX++;
+                }
         }
 	else{
 		sparki.moveRight(90);
@@ -382,11 +422,25 @@ int state5() {
 			sparki.moveForward(1);
 			currentY--;
 		}
+                sparki.moveLeft(90);
+                while(currentX < foundX){
+                  sparki.moveForward(1);
+                  currentX++;
+                }
 	}
-    return 1;
+        return 1;
 }
 
 void loop() { 
+        sparki.clearLCD();
+        sparki.print("theta:");
+        sparki.println(theta);
+        sparki.print("x:");
+        sparki.println(currentX);
+        sparki.print("y:");
+        sparki.println(currentY);
+        sparki.updateLCD();
+        delay(100);
 	//stuff for odometry
 	if (theta <= -360) {
 		theta = 0 - (360 + theta);  //someone check my math pls
@@ -396,7 +450,14 @@ void loop() {
 	}
 
 	//main loop
-      	if (state == 1) //search the map, only move to state 2 if an object is detected
+        if (state == 0) //calibrate
+        {
+                sparki.println("calibrating...");
+                sparki.updateLCD();
+                state = state0();
+                sparki.clearLCD();
+        }
+      	else if (state == 1) //search the map, only move to state 2 if an object is detected
 	{
 		sparki.println("searching for objects...");
 		sparki.updateLCD();
