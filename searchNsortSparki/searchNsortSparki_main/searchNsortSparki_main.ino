@@ -6,8 +6,9 @@
 
 SFE_ISL29125 RGB_sensor;
 
+searchNsort sNs;
+
 void setup() {
-	searchNsort sNs;
 	sparki.clearLCD();
 	sparki.println("running setup...");
 	sparki.updateLCD();
@@ -44,7 +45,7 @@ void loop() {
 	else if (sNs.state == 2){
 	    sparki.println("collecting object and reading color...");
 		sparki.updateLCD();
-		state = state2();
+		sNs.state2();
 	    sparki.clearLCD();
     }
 	else if (sNs.state == 3){
