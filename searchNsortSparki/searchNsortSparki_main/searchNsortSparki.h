@@ -1,3 +1,6 @@
+#ifndef searchNsortSparki_h
+#define searchNsortSparki_h
+
 struct tpRoll{
 	int locationX;
 	int locationY;
@@ -59,3 +62,4 @@ private:
 	colors theColors;
 };
 
+#endif
