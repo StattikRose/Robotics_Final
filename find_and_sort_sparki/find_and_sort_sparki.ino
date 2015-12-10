@@ -334,7 +334,29 @@ int state5() {
 	//use pathPlan() function here?
 	//the location that sparki should return to is saved in the foundX and foundY vars. should we also include a foundTheta?
 	// ^^^ made the foundTheta var just incase
-        return 1;
+	
+	// Return to SBLI line?
+	
+	//Return to original position:
+	sparki.moveRight(180);
+	while(currentX < foundX){
+		sparki.moveForward(1);
+		currentX++;
+	}
+	if(currentY < foundY){
+		sparki.moveLeft(90);
+		while(currentY < foundY){
+			sparki.moveForward(1);
+			currentY++;
+		}
+	else{
+		sparki.moveRight(90);
+		while(currentY >foundY){
+			sparki.moveForward(1);
+			currentY++;
+		}
+	}
+    return 1;
 }
 
 void loop() { 
