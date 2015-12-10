@@ -24,10 +24,10 @@ int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
 int state1Dir = 0;
-int white = NULL;
-int blue = NULL;
+int mint = NULL;
+int blueS = NULL;
 int pink = NULL;
-int whiteBinY = NULL;
+int mintBinY = NULL;
 int blueBinY = NULL;
 int pinkBinY = NULL;
 int red = NULL;
@@ -263,29 +263,29 @@ int state4() {
 		int colorStripEnd = sparki.lineCenter();
 		//Based on current IR reading move to an interstection
 		//White
-		if(colorStripStart > gray){
-			while(colorStripEnd > gray){
+		if(colorStripStart > mint){
+			while(colorStripEnd > mint){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
 		}
 		//Grey
-		else if(colorStripStart > black){
-			while(colorStripEnd < white){
+		else if(colorStripStart > blue){
+			while(colorStripEnd < pink){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
 		}
 		//Black
 		else{
-			while(colorStripEnd < gray){
+			while(colorStripEnd < mint){
 				sparki.moveForward();
 				colorStripEnd = sparki.lineCenter();
 			}
 		}
 		//Once interstection is reached fix odometry
 		//Started in White or Grey
-		if(colorStripStart > gray || colorStripStart > black){
+		if(colorStripStart > mint || colorStripStart > blue){
 			currentX =  10;// "LOWER INTERSECTION X";
 			currentY =  25;//"LOWER INTERSECTION Y";
 		}
@@ -298,15 +298,15 @@ int state4() {
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
 		if(ballColor == "mint"){
-			moveDist = currentY - BinY;
+			moveDist = currentY - mintBinY;
                         sparki.println("moving to mint bin..");
 		}
 		else if(ballColor == "pink"){
-			moveDist = currentY - BinY;
+			moveDist = currentY - pinkBinY;
                         sparki.println("moving to pink bin...");
 		}
 		else if(ballColor == "blue"){
-			moveDist = currentY - BinY;
+			moveDist = currentY - blueBinY;
                         sparki.println("moving to blue bin...");
 		}
                 else {
@@ -349,6 +349,7 @@ int state5() {
 			sparki.moveForward(1);
 			currentY++;
 		}
+        }
 	else{
 		sparki.moveRight(90);
 		while(currentY >foundY){
@@ -392,11 +393,8 @@ void loop() {
 	}
 	else if (state == 4)
 	{
-<<<<<<< Updated upstream:find_and_sort_sparki/find_and_sort_sparki.ino
                 sparki.println("finding correct bin...");
-=======
-		parki.println("Starting state 4...");
->>>>>>> Stashed changes:Final_Proj/Final_Proj_2/Final_Proj_2.ino
+		sparki.println("Starting state 4...");
 		sparki.updateLCD();
 		state = state4();
                 sparki.clearLCD();
