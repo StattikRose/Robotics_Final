@@ -24,12 +24,9 @@ int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
 int state1Dir = 0;
-int mint = NULL;
-int blueS = NULL;
-int pink = NULL;
-int mintBinY = NULL;
-int blueBinY = NULL;
-int pinkBinY = NULL;
+int mintBinY = 5;
+int blueBinY = 15;
+int pinkBinY = 25;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
@@ -259,33 +256,36 @@ int findSBLI() {
 }
 
 int state4() {
-		int colorStripStart = sparki.lineCenter();
-		int colorStripEnd = sparki.lineCenter();
+		int colorStripStart = sparki.edgeLeft();
+		int colorStripEnd = sparki.edgeLeft();
 		//Based on current IR reading move to an interstection
-		//White
-		if(colorStripStart > mint){
-			while(colorStripEnd > mint){
-				sparki.moveForward();
-				colorStripEnd = sparki.lineCenter();
+		//Pink
+		if(colorStripStart < 977 && currentY <= mapSizeY/2){
+			while(colorStripEnd < 977){
+				sparki.moveForward(1);
+        currentY++;
+				colorStripEnd = sparki.edgeLeft();
 			}
 		}
-		//Grey
-		else if(colorStripStart > blue){
-			while(colorStripEnd < pink){
-				sparki.moveForward();
-				colorStripEnd = sparki.lineCenter();
+		//Mint
+		else if(colorStripStart >= 977){
+			while(colorStripEnd >= 977){
+				sparki.moveForward(1);
+        currentY++;
+				colorStripEnd = sparki.edgeLeft();
 			}
 		}
-		//Black
-		else{
-			while(colorStripEnd < mint){
-				sparki.moveForward();
-				colorStripEnd = sparki.lineCenter();
+		//Blue
+		else if(currentY >= mapSizeY/2){
+			while(colorStripEnd < 977){
+				sparki.moveBackward(1);
+        currentY--;
+				colorStripEnd = sparki.edgeLeft();
 			}
 		}
 		//Once interstection is reached fix odometry
 		//Started in White or Grey
-		if(colorStripStart > mint || colorStripStart > blue){
+		if(currentY <= mapSizeY/2){
 			currentX =  10;// "LOWER INTERSECTION X";
 			currentY =  25;//"LOWER INTERSECTION Y";
 		}
@@ -298,35 +298,48 @@ int state4() {
 		//Find the correct bin (ball color corrisponds to greyscale)
 		int moveDist = 0;
 		if(ballColor == "mint"){
-			moveDist = currentY - mintBinY;
+			moveDist = mintBinY - currentY;
                         sparki.println("moving to mint bin..");
 		}
 		else if(ballColor == "pink"){
-			moveDist = currentY - pinkBinY;
+			moveDist = pinkBinY - currentY;
+
                         sparki.println("moving to pink bin...");
 		}
 		else if(ballColor == "blue"){
-			moveDist = currentY - blueBinY;
+			moveDist =blueBinY - currentY;
+
                         sparki.println("moving to blue bin...");
 		}
                 else {
                         sparki.println("unrecognized color"); 
                 }
                 sparki.updateLCD();
-		if(moveDist < 0){
-			sparki.moveRight(180);
-		}
-		sparki.moveForward(moveDist);
-
-		//Move so that grippers are over the bin
-		//Move left or right then forward
-		
-
-
+	  if(moveDist < 0){
+      sparki.moveBackward(moveDist);
+      currentY = currentY - moveDist;
+    }
+    else{
+      sparki.moveForward(moveDist);
+      currentY = currentY + moveDist;
+    }
+    //Move so that grippers are over the bin
+    sparki.turnLeft(90);
+    theta = -180;
+		while(sparki.lineCenter() > 900){
+      sparki.moveForward(1);
+      currentX--;
+    }
 		//Deliver ball
         sparki.gripperOpen();
         delay(3000);
         sparki.gripperStop();
+    sparki.turnLeft(180);
+    theta = 0;
+    while(sparki.lineCenter() > 900){
+      sparki.moveForward(1);
+      currentX++;
+    }
 	return 5;
 }
 
@@ -354,7 +367,7 @@ int state5() {
 		sparki.moveRight(90);
 		while(currentY >foundY){
 			sparki.moveForward(1);
-			currentY++;
+			currentY--;
 		}
 	}
     return 1;
