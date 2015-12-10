@@ -24,9 +24,9 @@ int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
 int state1Dir = 0;
-int mintBinY = 5;
-int blueBinY = 15;
-int pinkBinY = 25;
+int mintBinY = 15;
+int blueBinY = 25;
+int pinkBinY = 5;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
@@ -94,24 +94,21 @@ int lookAround() {
 
 int readColor() {  
    sparki.println("reading color...");
-   unsigned int red = RGB_sensor.readRed();
-   unsigned int green = RGB_sensor.readGreen();
-   unsigned int blue = RGB_sensor.readBlue();
-   //sparki.print("color:");
-   //sparki.println(red);
-   //sparki.println(green);
-   //sparki.println(blue);
-   sparki.updateLCD();
-   String color;
-   if (red > 100 && green > 100 && blue > 100) {
-         color = "mint";
-   }
-   else if (blue < 100) {
-         color = "pink";  
-   }
-   else {
-         color = "blue";  
-   }
+   unsigned int red = (RGB_sensor.readRed() + RGB_sensor.readRed() + RGB_sensor.readRed() + RGB_sensor.readRed() + RGB_sensor.readRed()) / 5;
+   unsigned int green = (RGB_sensor.readGreen() + RGB_sensor.readGreen() + RGB_sensor.readGreen() + RGB_sensor.readGreen() + RGB_sensor.readGreen()) / 5;
+   unsigned int blue = (RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue()) / 5;
+   int sum = red + green + blue;
+    sum = sum*10;
+    String color;
+    if (sum < 950) {
+          color = "blue";
+    }
+    else if (sum > 1300) {
+          color = "white";  
+    }
+    else {
+          color = "pink";  
+    }
    sparki.println(color);
    sparki.updateLCD();
    delay(3000);
@@ -203,6 +200,13 @@ int state2() {
         delay(3000);
         sparki.gripperStop();
         readColor(); 
+        String temp = ballColor;
+        bool bad = true;
+        while(!bad){
+          readColor();
+          if(temp == ballColor)
+            bad = false;
+        }
 	return 3;
 }
 
@@ -216,7 +220,7 @@ int state3() {
     sparki.moveLeft(Turn);
   }
   else {
-    sparki.moveRight(Turn);
+    sparki.moveLeft(Turn);
   }
   int sbli1 = findSBLI();
   return 4;
@@ -245,42 +249,48 @@ int findSBLI() {
   
   // ALIGN SPARKI'S WHEEL WITH THE SBLI LINE 
   // MEASURE DISTANCE FROM IR TO WHEEL
-  int senseSBLI = 2.2;
+  int senseSBLI = 3;
   sparki.moveForward(senseSBLI);
   
   // TURN SPARKI TO ALLIGN WITH THE SBLI
-  sparki.motorRotate(MOTOR_LEFT, DIR_CCW, 100);
-  delay(200);
-  sparki.motorStop(MOTOR_LEFT);
+  sparki.moveRight(90);
   return 4;
 }
 
 int state4() {
-		int colorStripStart = sparki.edgeLeft();
-		int colorStripEnd = sparki.edgeLeft();
+		int colorStripStart = sparki.lineLeft();
+		int colorStripEnd = sparki.lineLeft();
+                sparki.println(colorStripEnd);
+                sparki.updateLCD();
 		//Based on current IR reading move to an interstection
 		//Pink
-		if(colorStripStart < 977 && currentY <= mapSizeY/2){
-			while(colorStripEnd < 977){
+		if(colorStripStart < 970 && currentY <= mapSizeY/2){
+			while(colorStripEnd < 970){
 				sparki.moveForward(1);
-        currentY++;
-				colorStripEnd = sparki.edgeLeft();
+                                currentY++;
+				colorStripEnd = sparki.lineLeft();
+                                sparki.println(colorStripEnd);
+                                sparki.updateLCD();
 			}
 		}
 		//Mint
-		else if(colorStripStart >= 977){
-			while(colorStripEnd >= 977){
+		else if(colorStripStart >= 970){
+			while(colorStripEnd >= 970){
 				sparki.moveForward(1);
-        currentY++;
-				colorStripEnd = sparki.edgeLeft();
+                                currentY++;
+				colorStripEnd = sparki.lineLeft();
+                                sparki.println(colorStripEnd);
+                                sparki.updateLCD();
 			}
 		}
 		//Blue
 		else if(currentY >= mapSizeY/2){
-			while(colorStripEnd < 977){
+			while(colorStripEnd < 970){
 				sparki.moveBackward(1);
-        currentY--;
-				colorStripEnd = sparki.edgeLeft();
+                                currentY--;
+				colorStripEnd = sparki.lineLeft();
+                                sparki.println(colorStripEnd);
+                                sparki.updateLCD();
 			}
 		}
 		//Once interstection is reached fix odometry
@@ -315,7 +325,8 @@ int state4() {
                         sparki.println("unrecognized color"); 
                 }
                 sparki.updateLCD();
-	  if(moveDist < 0){
+    if(moveDist < 0){
+      moveDist = moveDist * -1;
       sparki.moveBackward(moveDist);
       currentY = currentY - moveDist;
     }
@@ -324,17 +335,19 @@ int state4() {
       currentY = currentY + moveDist;
     }
     //Move so that grippers are over the bin
-    sparki.turnLeft(90);
+    sparki.moveLeft(90);
     theta = -180;
 		while(sparki.lineCenter() > 900){
       sparki.moveForward(1);
       currentX--;
     }
 		//Deliver ball
+        sparki.moveBackward(1);
+        currentX++;
         sparki.gripperOpen();
         delay(3000);
         sparki.gripperStop();
-    sparki.turnLeft(180);
+    sparki.moveLeft(180);
     theta = 0;
     while(sparki.lineCenter() > 900){
       sparki.moveForward(1);
