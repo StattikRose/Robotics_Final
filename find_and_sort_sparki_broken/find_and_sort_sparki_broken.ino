@@ -90,7 +90,12 @@ int lookAround() {
         sparki.print("Ultrasound Reading:");
 	sparki.println(dist);
         sparki.updateLCD();
+        delay(1000);
 	if (dist < 15 && dist > 0) {
+                sparki.print(dist);
+                sparki.println(": Hope I didnt fuck up");
+                sparki.updateLCD();
+                delay(1000);
                 moveDist = dist;		
 		return 0; //grab it up 
 	}
@@ -195,6 +200,8 @@ int state1() {
 		foundTheta = theta;
                 int checkVis = lookAround();
                 if (checkVis == 1) {
+                    
+                    /*
                     int wantedTheta = foundTheta;
                     int Turn = wantedTheta-theta;
                     if (abs(theta) < 90) {
@@ -205,6 +212,7 @@ int state1() {
                     }
                     sparki.println("oops!");
                     sparki.updateLCD();
+                    */
                     return 1; //oops!
                 }
                 else {
@@ -305,8 +313,6 @@ int state4() {
 				sparki.moveForward(1);
                                 currentY++;
 				colorStripEnd = sparki.edgeLeft();
-                                sparki.println(colorStripEnd);
-                                sparki.updateLCD();
 			}
 		}
 		//Mint
@@ -315,8 +321,6 @@ int state4() {
 				sparki.moveForward(1);
                                 currentY++;
 				colorStripEnd = sparki.edgeLeft();
-                                sparki.println(colorStripEnd);
-                                sparki.updateLCD();
 			}
 		}
 		//Blue
@@ -325,12 +329,8 @@ int state4() {
 				sparki.moveBackward(1);
                                 currentY--;
 				colorStripEnd = sparki.edgeLeft();
-                                sparki.println(colorStripEnd);
-                                sparki.updateLCD();
 			}
 		}
-                sparki.println("Found");
-                sparki.updateLCD();
 		//Once interstection is reached fix odometry
 		//Started in pink
 		if(currentY <= mapSizeY/2){
@@ -360,7 +360,10 @@ int state4() {
                         sparki.println("moving to blue bin...");
 		}
                 else {
-                        sparki.println("unrecognized color"); 
+                        sparki.println("unrecognized color");
+                        ballColor = "white"; 
+                        moveDist = mintBinY - currentY;
+                        sparki.println("moving to white bin..");
                 }
                 sparki.updateLCD();
     if(moveDist < 0){
@@ -481,6 +484,7 @@ void loop() {
 	{
                 sparki.println("finding correct bin...");
 		sparki.println("Starting state 4...");
+                sparki.println(ballColor);
 		sparki.updateLCD();
 		state = state4();
                 sparki.clearLCD();
