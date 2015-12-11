@@ -23,7 +23,7 @@ int usDir = 0;
 int moveDist;
 int sweep = 5;
 int sweepThresh = 25;
-int mintBinY = 3;
+int mintBinY = 36;
 int blueBinY = 53;
 int pinkBinY = 8;
 int red = NULL;
@@ -449,41 +449,45 @@ int state4() {
     delay(2500);
     sparki.gripperStop();
     sparki.moveLeft(180);
-    bool left2far = false;
-    bool right2far = false;
-    while(sparki.edgeLeft() > 900 && sparki.edgeRight() > 900){
+    sparki.moveBackward(1);
+    bool left2far = true;
+    bool right2far = true;
+    bool fixleft = false;
+    bool fixright = false;
+    while(left2far && right2far){
        if(sparki.edgeLeft() < 900) {
-         bool left2far = true;
+         left2far = false;
+         fixleft = true;
        }
        if(sparki.edgeRight() < 900) {
-         bool right2far = true;
+         right2far = false;
+         fixright = true;
        }
        sparki.moveForward(1);
        currentX++;
     }
-    if (left2far) {
+    if (fixleft && fixright){
+      delay(1000);
+    }
+    else if (fixleft) {
        while(sparki.edgeRight() > 900){
          sparki.moveLeft(1);
        }
     }
     
-    if (right2far) {
+    else if (fixright) {
        while(sparki.edgeLeft() > 900){
          sparki.moveRight(1);
        }
     }
     
-    if(sparki.edgeRight() > 900 && sparki.edgeLeft() > 900){
-       while(sparki.edgeRight() > 900 && sparki.edgeLeft() > 900){
-         sparki.moveForward(1);
-       }
-    }
 //    while(sparki.lineCenter() > 900){
 //      sparki.moveForward(1);
 //      currentX++;
 //    }
 //    sparki.moveForward(3);
-	return 5;
+    delay(4000);
+    return 5;
 }
 
 int state5() {
@@ -512,6 +516,7 @@ int state5() {
                         
 		}
                 sparki.moveRight(90);
+                theta = 0;
                 while(currentX < foundX){
                   sparki.moveForward(1);
                   currentX++;
@@ -544,6 +549,7 @@ int state5() {
                         
 		}
                 sparki.moveLeft(90);
+                theta = 0;
                 while(currentX < foundX){
                   sparki.moveForward(1);
                   currentX++;
