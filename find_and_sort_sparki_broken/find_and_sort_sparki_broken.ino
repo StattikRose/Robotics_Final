@@ -22,11 +22,10 @@ int usTheta = 0;
 int usDir = 0;
 int moveDist;
 int sweep = 5;
-int sweepThresh = 35;
-int state1Dir = 0;
-int mintBinY = 37;
-int blueBinY = 61;
-int pinkBinY = 13;
+int sweepThresh = 25;
+int mintBinY = 3;
+int blueBinY = 53;
+int pinkBinY = 8;
 int red = NULL;
 int green = NULL;
 int blue = NULL;
@@ -68,34 +67,36 @@ void planPath(int theta, int curX, int curY, int destX, int destY) {
 //right now the code is running faster than it takes for the ping to come back, which I think might solve the curse of the incessant beeping
 //but what should this delay be??
 
-int lookAround() {
-        if (usDir == 0) { //move ultrasound left
-            usTheta = usTheta - sweep;
-            if (usTheta < -sweepThresh) { //left boundary
-                usDir = 1; //switch dir
-                usTheta = usTheta + sweep; //move right
+int lookAround(int headMove) {
+        if (headMove) {
+            if (usDir == 0) { //move ultrasound left
+                usTheta = usTheta - sweep;
+                if (usTheta < -sweepThresh) { //left boundary
+                    usDir = 1; //switch dir
+                    usTheta = usTheta + sweep; //move right
+                }
             }
+            else { //move ultrasound right
+                 usTheta = usTheta + sweep;
+                 if (usTheta > sweepThresh) { //right boundary
+                     usDir = 0; //switch dir
+                     usTheta = usTheta - sweep; //move left
+                 }
+            }
+            sparki.servo(usTheta);
         }
-        else { //move ultrasound right
-             usTheta = usTheta + sweep;
-             if (usTheta > sweepThresh) { //right boundary
-                 usDir = 0; //switch dir
-                 usTheta = usTheta - sweep; //move left
-             }
-        }
-        sparki.servo(usTheta);
 	int dist = sparki.ping();
 	delay(100); //what should this be?
-        sparki.clearLCD();
-        sparki.print("Ultrasound Reading:");
-	sparki.println(dist);
-        sparki.updateLCD();
-        delay(1000);
+        //sparki.clearLCD();
+        //sparki.print("Ultrasound Reading:");
+	//sparki.println(dist);
+        //sparki.updateLCD();
+        //delay(1000);
 	if (dist < 15 && dist > 0) {
-                sparki.print(dist);
-                sparki.println(": Hope I didnt fuck up");
-                sparki.updateLCD();
-                delay(1000);
+                //sparki.print(dist);
+                //sparki.println(": Hope I didnt fuck up");
+                //sparki.updateLCD();
+                //delay(1000);
                 moveDist = dist;		
 		return 0; //grab it up 
 	}
@@ -111,21 +112,65 @@ int readColor() {
    unsigned int blue = (RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue() + RGB_sensor.readBlue()) / 5;
    int sum = red + green + blue;
     sum = sum*10;
-    String color;
+    //String color;
     if (sum < 950) {
-          color = "blue";
+          ballColor = "blue";
     }
     else if (sum > 1300) {
-          color = "white";  
+          ballColor = "white";  
     }
     else {
-          color = "pink";  
+          ballColor = "pink";  
     }
-   sparki.println(color);
+   sparki.println(ballColor);
    sparki.updateLCD();
    delay(3000);
-   ballColor = color;
+   //ballColor = color;
    //return sum;
+}
+
+void shake() {
+    int drop = 0;
+    while (drop == 0) {
+         int dist = sparki.ping();
+         delay(100);
+         if (dist > 10) {
+             drop = 1; 
+         }
+         else {
+             sparki.moveRight(5);
+             delay(100);
+             sparki.moveRight(5);
+             delay(100);
+             sparki.moveRight();
+             delay(100);
+             sparki.moveRight();
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveLeft(5);
+             delay(100);
+             sparki.moveRight(5);
+             delay(100);
+             sparki.moveRight(5);
+             delay(100);
+             sparki.moveRight(5);
+             delay(100);
+             sparki.moveRight(5);
+         } 
+    }
 }
 
 int state0() {
@@ -170,6 +215,8 @@ int state1() {
         		sparki.moveLeft(90);
         		theta = theta - 90;
                         sparki.servo(SERVO_CENTER);
+                        usTheta = 0;
+                        delay(100);
         	}
         }
         else {
@@ -186,9 +233,11 @@ int state1() {
         		sparki.moveRight(90);
         		theta = theta + 90;
                         sparki.servo(SERVO_CENTER);
+                        usTheta = 0;
+                        delay(100);
         	}  
         }
-	int vis = lookAround();
+	int vis = lookAround(1);
 	if (vis == 1) {
 		return 1; //didn't find anything, going back to state 1 
 	}
@@ -198,7 +247,7 @@ int state1() {
                 foundX = currentX;
                 foundY = currentY;
 		foundTheta = theta;
-                int checkVis = lookAround();
+                int checkVis = lookAround(0);
                 if (checkVis == 1) {
                     
                     /*
@@ -231,7 +280,7 @@ int state2() {
         //...or not? am i thinking about ^^^ this correctly?
         if (usTheta < 0) {
             sparki.moveRight(usTheta); //attempting to compensate for (-) usTheta value
-            theta = theta - usTheta; 
+            theta = theta + usTheta; 
         }
         else if (usTheta > 0) {
             sparki.moveRight(usTheta);
@@ -335,12 +384,12 @@ int state4() {
 		//Started in pink
 		if(currentY <= mapSizeY/2){
 			currentX =  0;// "LOWER INTERSECTION X";
-			currentY =  26;//"LOWER INTERSECTION Y";
+			currentY =  20;//"LOWER INTERSECTION Y";
 		}
 		//Started in white or blue
 		else{
 			currentX =  0;//"UPPER INTERSECTION X";
-			currentY =  50;//"UPPER INTERSECTION Y";
+			currentY =  40;//"UPPER INTERSECTION Y";
 		}
 
 		//Find the correct bin (ball color corrisponds to greyscale)
@@ -355,15 +404,14 @@ int state4() {
                         sparki.println("moving to pink bin...");
 		}
 		else if(ballColor == "blue"){
-			moveDist =blueBinY - currentY;
+			moveDist = blueBinY - currentY;
 
                         sparki.println("moving to blue bin...");
 		}
                 else {
                         sparki.println("unrecognized color");
-                        ballColor = "white"; 
-                        moveDist = mintBinY - currentY;
-                        sparki.println("moving to white bin..");
+                        sparki.println("This is trash!");
+
                 }
                 sparki.updateLCD();
     if(moveDist < 0){
@@ -386,14 +434,55 @@ int state4() {
         sparki.moveBackward(1);
         currentX++;
         sparki.gripperOpen();
-        delay(3000);
+        delay(1000);
         sparki.gripperStop();
-    sparki.moveLeft(180);
-    theta = 0;
-    while(sparki.lineCenter() > 900){
-      sparki.moveForward(1);
-      currentX++;
+    int dist = sparki.ping();
+    delay(100);
+    sparki.clearLCD();
+    sparki.println(dist);
+    sparki.updateLCD();
+    delay(3000);
+    if (dist < 10) {
+          shake();
     }
+    sparki.gripperOpen();
+    delay(2500);
+    sparki.gripperStop();
+    sparki.moveLeft(180);
+    bool left2far = false;
+    bool right2far = false;
+    while(sparki.edgeLeft() > 900 && sparki.edgeRight() > 900){
+       if(sparki.edgeLeft() < 900) {
+         bool left2far = true;
+       }
+       if(sparki.edgeRight() < 900) {
+         bool right2far = true;
+       }
+       sparki.moveForward(1);
+       currentX++;
+    }
+    if (left2far) {
+       while(sparki.edgeRight() > 900){
+         sparki.moveLeft(1);
+       }
+    }
+    
+    if (right2far) {
+       while(sparki.edgeLeft() > 900){
+         sparki.moveRight(1);
+       }
+    }
+    
+    if(sparki.edgeRight() > 900 && sparki.edgeLeft() > 900){
+       while(sparki.edgeRight() > 900 && sparki.edgeLeft() > 900){
+         sparki.moveForward(1);
+       }
+    }
+//    while(sparki.lineCenter() > 900){
+//      sparki.moveForward(1);
+//      currentX++;
+//    }
+//    sparki.moveForward(3);
 	return 5;
 }
 
@@ -406,29 +495,68 @@ int state5() {
 	
 	//Return to original position:
 	//sparki.moveRight(180);
-	
 	if(currentY < foundY){
 		sparki.moveLeft(90);
 		while(currentY < foundY){
 			sparki.moveForward(1);
 			currentY++;
+
+                        sparki.clearLCD();
+                        sparki.print("theta:");
+                        sparki.println(theta);
+                        sparki.print("x:");
+                        sparki.println(currentX);
+                        sparki.print("y:");
+                        sparki.println(currentY);
+                        sparki.updateLCD();
+                        
 		}
                 sparki.moveRight(90);
                 while(currentX < foundX){
                   sparki.moveForward(1);
                   currentX++;
+                        
+                        sparki.clearLCD();
+                        sparki.print("theta:");
+                        sparki.println(theta);
+                        sparki.print("x:");
+                        sparki.println(currentX);
+                        sparki.print("y:");
+                        sparki.println(currentY);
+                        sparki.updateLCD();
+                        
                 }
         }
 	else{
 		sparki.moveRight(90);
-		while(currentY >foundY){
+		while(currentY > foundY){
 			sparki.moveForward(1);
 			currentY--;
+
+                        sparki.clearLCD();
+                        sparki.print("theta:");
+                        sparki.println(theta);
+                        sparki.print("x:");
+                        sparki.println(currentX);
+                        sparki.print("y:");
+                        sparki.println(currentY);
+                        sparki.updateLCD();
+                        
 		}
                 sparki.moveLeft(90);
                 while(currentX < foundX){
                   sparki.moveForward(1);
                   currentX++;
+                  
+                        sparki.clearLCD();
+                        sparki.print("theta:");
+                        sparki.println(theta);
+                        sparki.print("x:");
+                        sparki.println(currentX);
+                        sparki.print("y:");
+                        sparki.println(currentY);
+                        sparki.updateLCD();
+                        
                 }
 	}
         return 1;
@@ -500,7 +628,7 @@ void loop() {
 	{
                 sparki.println("partying...");
 		sparki.updateLCD();
-                sparki.moveLeft(90); //spin game strong
+                sparki.moveLeft(360); //spin game strong
                 sparki.clearLCD();
 		//all done!
 	}
