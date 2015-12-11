@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-    /*
+    
     sparki.clearLCD();
     sparki.println("IR:");
     sparki.println(sparki.lineCenter());
@@ -17,7 +17,7 @@ void loop() {
     sparki.println(RGB_sensor.readStatus());
     sparki.updateLCD();
     delay(3000);
-    */
+ 
     sparki.clearLCD();
     sparki.println("RED:");
     sparki.println(RGB_sensor.readRed());
